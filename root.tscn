@@ -1,0 +1,353 @@
+[gd_scene load_steps=11 format=3 uid="uid://chr7amhjts4ks"]
+
+[ext_resource type="PackedScene" uid="uid://bmxe6vphltuan" path="res://objects/Vostok.glb" id="1_du4gx"]
+
+[sub_resource type="GDScript" id="GDScript_fxpjj"]
+script/source = "extends Node3D
+
+var planet_file = preload(\"res://objects/planet.tscn\")
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	for i in range(60):
+		var planet = planet_file.instantiate()
+		planet.position = Vector3(randf()-0.5, randf()-0.5, randf()-0.5) * 10000
+		$Space.add_child(planet)
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	if Input.is_key_pressed(KEY_ESCAPE):
+		get_tree().quit()
+	pass
+"
+
+[sub_resource type="GDScript" id="GDScript_s32g0"]
+script/source = "extends Camera3D
+
+@export var pointer_color : Color
+@export var colcurve : Curve
+
+@onready var spaceship = get_parent().find_child(\"Spaceship\")
+
+var objects : PackedVector3Array
+
+var sel_idx = 0
+var selected : Vector3
+
+var target_transform
+
+var animation = 2
+
+var space
+
+func update_target():
+	if space.get_child_count() > 0:
+		sel_idx %= space.get_child_count()
+		selected = space.get_child(sel_idx).position
+		target_transform = transform.looking_at(selected)
+		if objects.is_empty():
+			for i in range(space.get_child_count()):
+				objects.append(space.get_child(i).position)
+	animation = 0
+	$Scanner_mode.target_changed(selected)
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	target_transform = transform
+	space = get_parent().find_child(\"Space\")
+	#print(space)
+	#update_target()
+	pass # Replace with function body.
+
+func follow(from, to, distance):
+	var dir = (to - from).normalized()
+	var basis = Basis.IDENTITY
+	basis.looking_at(dir)
+	var tr = Transform3D(basis, to - dir * distance)
+	return tr
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey:
+		if event.pressed:
+			if event.keycode == KEY_A:
+				sel_idx += 1
+				#sel_idx = find_nearest(false)
+				update_target()
+			if event.keycode == KEY_D:
+				pass
+				#sel_idx = find_nearest(true)
+				sel_idx -= 1
+				update_target()
+			if event.keycode == KEY_SPACE:
+				get_parent().find_child(\"Spaceship\").set_target(objects[sel_idx])
+				#print(\"follow\")
+	if event is InputEventMouseMotion:
+		if event.button_mask & MOUSE_BUTTON_MASK_LEFT:
+			var vec = target_transform.origin - spaceship.target.origin
+			var tr = target_transform * spaceship.target.inverse()
+			tr = tr.rotated(Vector3.UP, deg_to_rad(event.relative.x))
+			tr = tr.rotated(transform.basis * Vector3.LEFT, deg_to_rad(event.relative.y))
+			#target_transform = tr * spaceship.target
+			#tr = tr.rotated(Vector3.LEFT, deg_to_rad(event.relative.y))
+			#tr = tr.rotated(Vector3.UP, deg_to_rad(event.relative.x))
+			#vec = tr * vec + spaceship.target.origin
+			target_transform.origin.y += deg_to_rad(event.relative.y)
+			target_transform.origin += global_transform.basis * Vector3.LEFT * deg_to_rad(event.relative.x)
+			target_transform = follow(target_transform.origin, spaceship.transform.origin, 3)
+			target_transform = target_transform.looking_at(spaceship.transform.origin)
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	transform = transform.interpolate_with(target_transform, 0.1)
+	$Scanner_mode.queue_redraw()
+	$Interface.queue_redraw()
+	if is_position_in_frustum(selected):
+		animation += delta
+	else:
+		animation = 0
+	if objects.is_empty():
+		for i in range(space.get_child_count()):
+			objects.append(space.get_child(i).position)
+	#if not objects.is_empty():
+		#for i in range(1):
+		#	_rand_sort()
+		#selected = objects[sel_idx]
+	#print(objects.size())
+
+
+func _on_interface_draw() -> void:
+	var I = $Interface
+	var center = get_window().size / 2
+	var amax = 1
+	var d = min(animation, amax)
+	d = sqrt(d)
+	if !is_position_behind(selected):
+		I.draw_circle(unproject_position(selected), 7, Color(pointer_color, amax-d).lerp(Color.BEIGE, colcurve.sample(d)))
+		I.draw_circle(unproject_position(selected), (d)*50, Color(pointer_color, amax-d).lerp(Color.BEIGE, colcurve.sample(d)), false, 5)
+	#draw_circle()
+	pass # Replace with function body.
+"
+
+[sub_resource type="Curve" id="Curve_xfs4b"]
+_data = [Vector2(0.2, 1), 0.0, 0.0, 0, 0, Vector2(0.673684, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="GDScript" id="GDScript_7s2eg"]
+script/source = "extends Node2D
+
+@onready var cam = get_parent()
+#@export var appearance
+@export var ore_color : Color
+
+var mineral_array : Array
+
+var gen_timer = 0
+
+class MineralMarker:
+	var anim
+	var pos
+	var center
+	var queue_remove = false
+	func set_prop(pos, center):
+		self.anim = 0
+		self.pos = pos
+		self.center = center
+	func draw(painter: CanvasItem):
+		var anim1 = self.anim*self.anim
+		var coords = painter.cam.unproject_position(self.center + self.pos)
+		var coords2 = painter.cam.unproject_position(self.center + self.pos+self.pos.normalized() * lerpf(15, 4, anim1))
+		if queue_remove:
+			var spaceship_screen = painter.cam.unproject_position(painter.cam.spaceship.global_position)
+			coords2 = coords2.lerp(spaceship_screen, anim1)
+		if not painter.cam.is_position_behind(self.center + self.pos):
+			#if (self.center - painter.cam.position).dot(self.pos) < 0:
+			var col1 = painter.ore_color
+			if queue_remove:
+				col1 = Color(col1, 1-anim1)
+			else:
+				col1 = Color(col1, anim1)
+			painter.draw_line(coords, coords2, col1, 5)
+			painter.draw_circle(coords, 2.5, col1)
+			painter.draw_circle(coords2, 2.5, col1)
+	func process(delta):
+		if self.anim < 1:
+			self.anim += delta
+		if self.anim > 1:
+			self.anim = 1
+	func signal_delete():
+		self.queue_remove = true
+		self.anim = 0
+
+func target_changed(target):
+	mineral_array.clear()
+	for i in range(00):
+		var m = MineralMarker.new()
+		m.set_prop(Vector3(randf()-0.5, randf()-0.5, randf()-0.5).normalized()*100, target)
+		mineral_array.append(m)
+
+func generate_ore():
+	var m = MineralMarker.new()
+	var pos = (cam.position - cam.selected) + Vector3(randf()-0.5, randf()-0.5, randf()-0.5) * 30
+	m.set_prop(pos.normalized()*100, cam.selected)
+	mineral_array.append(m)
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	pass # Replace with function body.
+
+func _draw() -> void:
+	var coords = cam.unproject_position(cam.selected)
+	#draw_circle(coords, 10, Color.BLUE)
+	for marker in mineral_array:
+		marker.draw(self)
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	for marker in mineral_array:
+		marker.process(delta*4)
+	if not mineral_array.is_empty():
+		if mineral_array.front().queue_remove:
+			if mineral_array.front().anim >= 1:
+				mineral_array.pop_front()
+	if gen_timer > 0:
+		if Input.is_key_pressed(KEY_E):
+			if gen_timer - delta <= 0:
+				generate_ore()
+			gen_timer -= delta
+			#print(gen_timer)
+		elif Input.is_key_pressed(KEY_R):
+			#print(\"Key R\")
+			if gen_timer - delta <= 0:
+				for marker in mineral_array:
+					if not marker.queue_remove:
+						marker.signal_delete()
+						cam.find_child(\"Ore_display\").ore_target += randf_range(0.9, 1.1)
+						break
+			gen_timer -= delta
+		else:
+			gen_timer = 0
+	else:
+		if Input.is_key_pressed(KEY_E):
+			gen_timer = randf()
+		elif Input.is_key_pressed(KEY_R):
+			gen_timer = 0.1
+	pass
+"
+
+[sub_resource type="GDScript" id="GDScript_s08ui"]
+script/source = "extends Node2D
+
+@export var drawing_font : Font
+
+var ore = 0
+var ore_target = 0
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	pass # Replace with function body.
+
+func _draw() -> void:
+	var text = \"Запасы руды: \" + str(ore - fmod(ore, 0.001))
+	draw_multiline_string(drawing_font, Vector2(20, 40), text)
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	ore = lerpf(ore, ore_target, 0.2)
+	queue_redraw()
+"
+
+[sub_resource type="SystemFont" id="SystemFont_uebsj"]
+
+[sub_resource type="GDScript" id="GDScript_xasjn"]
+script/source = "extends MeshInstance3D
+
+var target
+var origin
+var progress
+
+@export var speedcurve : Curve
+
+func follow(from, to, distance):
+	var dir = (to - from).normalized()
+	var basis = Basis.IDENTITY
+	basis = basis.looking_at(dir)
+	var tr = Transform3D(basis, to - dir * distance)
+	return tr
+
+func set_target(target):
+	$\".\".origin = transform
+	$\".\".target = follow(position, target, 120)
+	progress = 0
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	origin = transform
+	target = transform
+	progress = INF
+	pass # Replace with function body.
+
+func num_cross(num, a, b):
+	return a < num and (a+b) >= num
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	if progress < 1:
+		transform = origin.interpolate_with(target, speedcurve.sample(progress))
+		if num_cross(0.9, progress, delta):
+			var cam = get_parent().find_child(\"Camera3D\")
+			cam.target_transform = follow(cam.position, target*$Track.position, 3)
+		progress += delta * 1
+		#print(progress)
+	pass
+"
+
+[sub_resource type="Curve" id="Curve_7stfx"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.447368, 0.131868), 0.659341, 0.659341, 0, 0, Vector2(0.621053, 0.802198), 1.41439, 1.41439, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="Environment" id="Environment_a1ax2"]
+background_mode = 1
+ambient_light_source = 2
+ambient_light_color = Color(0.270222, 0.270222, 0.270222, 1)
+
+[node name="Root" type="Node3D"]
+script = SubResource("GDScript_fxpjj")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.953412, 0.301671, 0, -0.301671, 0.953412, 0, 0.407301, 1.09294)
+far = 10000.0
+script = SubResource("GDScript_s32g0")
+pointer_color = Color(0.876688, 0.683372, 0.288181, 1)
+colcurve = SubResource("Curve_xfs4b")
+
+[node name="Scanner_mode" type="Node2D" parent="Camera3D"]
+script = SubResource("GDScript_7s2eg")
+ore_color = Color(1, 0.825743, 0.187742, 1)
+
+[node name="Interface" type="Node2D" parent="Camera3D"]
+
+[node name="Ore_display" type="Node2D" parent="Camera3D"]
+script = SubResource("GDScript_s08ui")
+drawing_font = SubResource("SystemFont_uebsj")
+
+[node name="Spaceship" type="MeshInstance3D" parent="."]
+script = SubResource("GDScript_xasjn")
+speedcurve = SubResource("Curve_7stfx")
+
+[node name="Vostok2" parent="Spaceship" instance=ExtResource("1_du4gx")]
+transform = Transform3D(-4.15258e-09, 0, 0.095, 0, 0.095, 0, -0.095, 0, -4.15258e-09, 0, 0, -0.33)
+
+[node name="Track" type="Node3D" parent="Spaceship"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.489687, -0.664556, 0.564422, 0, 0.647349, 0.762194, -0.871898, -0.373236, 0.316998, 3.27062, 1.15951, 0.38582)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_a1ax2")
+
+[node name="Space" type="Node3D" parent="."]
+
+[connection signal="draw" from="Camera3D/Interface" to="Camera3D" method="_on_interface_draw"]

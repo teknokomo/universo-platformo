@@ -1,0 +1,22 @@
+[gd_scene load_steps=6 format=3 uid="uid://bq0x1kejgm02h"]
+
+[ext_resource type="Texture2D" uid="uid://qrdmgvo8l7qh" path="res://textures/4k_ceres_fictional.jpg" id="1_gtxgy"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_yygu5"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ajwbo"]
+seamless = true
+noise = SubResource("FastNoiseLite_yygu5")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p56t6"]
+albedo_texture = ExtResource("1_gtxgy")
+heightmap_texture = SubResource("NoiseTexture2D_ajwbo")
+texture_filter = 4
+
+[sub_resource type="SphereMesh" id="SphereMesh_djjmt"]
+material = SubResource("StandardMaterial3D_p56t6")
+radius = 100.0
+height = 200.0
+
+[node name="Planet" type="MeshInstance3D"]
+mesh = SubResource("SphereMesh_djjmt")
