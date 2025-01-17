@@ -1,0 +1,16 @@
+# Main
+.import/
+.godot/
+export_presets.cfg
+.directory
+*.so
+*.os
+*.dblite
+
+# Server settings
+settings.cfg
+
+# Log files
+*.cfg
+*.txt
+*.log
