@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://chr7amhjts4ks"]
+[gd_scene load_steps=12 format=3 uid="uid://chr7amhjts4ks"]
 
 [ext_resource type="PackedScene" uid="uid://bmxe6vphltuan" path="res://objects/Vostok.glb" id="1_du4gx"]
 
@@ -6,12 +6,17 @@
 script/source = "extends Node3D
 
 var planet_file = preload(\"res://objects/planet.tscn\")
+var ice_asteroid_file = preload(\"res://objects/Asteroids/Ice_asteroid/ice_asteroid.tscn\")
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	for i in range(60):
 		var planet = planet_file.instantiate()
 		planet.position = Vector3(randf()-0.5, randf()-0.5, randf()-0.5) * 10000
+		for j in range(50):
+			var ice_asteroid = ice_asteroid_file.instantiate()
+			ice_asteroid.position = Vector3(randf()-0.5, randf()-0.5, randf()-0.5).normalized() * 120
+			planet.add_child(ice_asteroid)
 		$Space.add_child(planet)
 	pass # Replace with function body.
 
@@ -39,6 +44,8 @@ var selected : Vector3
 var target_transform
 
 var animation = 2
+
+var target_distance = 3
 
 var space
 
@@ -81,7 +88,7 @@ func _input(event: InputEvent) -> void:
 				sel_idx -= 1
 				update_target()
 			if event.keycode == KEY_SPACE:
-				get_parent().find_child(\"Spaceship\").set_target(objects[sel_idx])
+				spaceship.set_target(objects[sel_idx])
 				#print(\"follow\")
 	if event is InputEventMouseMotion:
 		if event.button_mask & MOUSE_BUTTON_MASK_LEFT:
@@ -89,13 +96,18 @@ func _input(event: InputEvent) -> void:
 			var tr = target_transform * spaceship.target.inverse()
 			tr = tr.rotated(Vector3.UP, deg_to_rad(event.relative.x))
 			tr = tr.rotated(transform.basis * Vector3.LEFT, deg_to_rad(event.relative.y))
-			#target_transform = tr * spaceship.target
-			#tr = tr.rotated(Vector3.LEFT, deg_to_rad(event.relative.y))
-			#tr = tr.rotated(Vector3.UP, deg_to_rad(event.relative.x))
-			#vec = tr * vec + spaceship.target.origin
 			target_transform.origin.y += deg_to_rad(event.relative.y)
 			target_transform.origin += global_transform.basis * Vector3.LEFT * deg_to_rad(event.relative.x)
-			target_transform = follow(target_transform.origin, spaceship.transform.origin, 3)
+			target_transform = follow(target_transform.origin, spaceship.transform.origin, target_distance)
+			target_transform = target_transform.looking_at(spaceship.transform.origin)
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			target_distance *= 0.9
+			target_transform = follow(target_transform.origin, spaceship.transform.origin, target_distance)
+			target_transform = target_transform.looking_at(spaceship.transform.origin)
+		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			target_distance /= 0.9
+			target_transform = follow(target_transform.origin, spaceship.transform.origin, target_distance)
 			target_transform = target_transform.looking_at(spaceship.transform.origin)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -245,13 +257,22 @@ script/source = "extends Node2D
 var ore = 0
 var ore_target = 0
 
+var description = \"\"\"Навести курсор - выбрать планету
+Перетаскивание - обзор
+Колесо мыши - приблизить/отдалить
+Клик по выбранной планете/Space - прыжок к планете
+A/D - следующая/предыдущая планета в порядковом номере
+Удерживать E - сканировать ресурсы
+Удерживать R - собрать ресурсы\"\"\"
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass # Replace with function body.
 
 func _draw() -> void:
 	var text = \"Запасы руды: \" + str(ore - fmod(ore, 0.001))
-	draw_multiline_string(drawing_font, Vector2(20, 40), text)
+	draw_multiline_string(drawing_font, Vector2(get_viewport().size.x - 250, 40), text, HORIZONTAL_ALIGNMENT_RIGHT, -1, 22)
+	draw_multiline_string(drawing_font, Vector2(20, 40), description)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -261,6 +282,67 @@ func _process(delta: float) -> void:
 
 [sub_resource type="SystemFont" id="SystemFont_uebsj"]
 
+[sub_resource type="GDScript" id="GDScript_ceowy"]
+script/source = "extends Node2D
+
+@onready var cam : Camera3D = get_parent()
+
+var my_thread: Thread = null
+var thread_running: bool = false
+
+var sel_timer = 0
+
+var select_target = null
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	pass # Replace with function body.
+
+func search_process():
+	var sdist = INF # Screen distance
+	var nearest : int
+	for i in range(len(cam.objects)):
+		var obj = cam.objects[i]
+		if not cam.is_position_behind(obj):
+			var pos = cam.unproject_position(obj)
+			if pos.distance_to(get_viewport().get_mouse_position()) < sdist:
+				nearest = i
+				sdist = pos.distance_to(get_viewport().get_mouse_position())
+	if sdist < 35:
+		if select_target != nearest:
+			select_target = nearest
+			sel_timer = 0
+	else:
+		select_target = null
+
+func _draw() -> void:
+	if select_target != null and sel_timer < 1:
+		var obj = cam.objects[select_target]
+		var offset = -PI/2
+		draw_arc(cam.unproject_position(obj), 10, offset, PI * sel_timer * 2 + offset, 50, cam.pointer_color, 3, true)
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if select_target == cam.sel_idx:
+				cam.spaceship.set_target(cam.objects[cam.sel_idx])
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	queue_redraw()
+	search_process()
+	var d1 = delta / 2
+	if select_target != null and select_target != cam.sel_idx:
+		if sel_timer < 1:
+			if sel_timer + d1 >= 1:
+				cam.sel_idx = select_target
+				cam.update_target()
+				sel_timer = 1
+			else:
+				sel_timer += d1
+	pass
+"
+
 [sub_resource type="GDScript" id="GDScript_xasjn"]
 script/source = "extends MeshInstance3D
 
@@ -269,6 +351,7 @@ var origin
 var progress
 
 @export var speedcurve : Curve
+@onready var cam = get_parent().find_child(\"Camera3D\")
 
 func follow(from, to, distance):
 	var dir = (to - from).normalized()
@@ -280,6 +363,7 @@ func follow(from, to, distance):
 func set_target(target):
 	$\".\".origin = transform
 	$\".\".target = follow(position, target, 120)
+	cam.target_transform = follow(cam.position, $\".\".target*$Track.position, 3)
 	progress = 0
 
 # Called when the node enters the scene tree for the first time.
@@ -294,11 +378,12 @@ func num_cross(num, a, b):
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	if progress < 1:
+	transform = transform.interpolate_with(target, 0.103)
+	#cam.target_transform = follow(cam.position, target*$Track.position, 3)
+	if progress < 1 and 0:
 		transform = origin.interpolate_with(target, speedcurve.sample(progress))
 		if num_cross(0.9, progress, delta):
-			var cam = get_parent().find_child(\"Camera3D\")
-			cam.target_transform = follow(cam.position, target*$Track.position, 3)
+			cam.target_transform = follow(cam.position, target*$Track.position, cam.target_distance)
 		progress += delta * 1
 		#print(progress)
 	pass
@@ -332,6 +417,9 @@ ore_color = Color(1, 0.825743, 0.187742, 1)
 [node name="Ore_display" type="Node2D" parent="Camera3D"]
 script = SubResource("GDScript_s08ui")
 drawing_font = SubResource("SystemFont_uebsj")
+
+[node name="Object_select" type="Node2D" parent="Camera3D"]
+script = SubResource("GDScript_ceowy")
 
 [node name="Spaceship" type="MeshInstance3D" parent="."]
 script = SubResource("GDScript_xasjn")

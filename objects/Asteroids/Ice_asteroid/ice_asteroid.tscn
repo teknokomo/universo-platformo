@@ -1,8 +1,17 @@
-[gd_scene load_steps=6 format=4 uid="uid://dkj85b2pmamcf"]
+[gd_scene load_steps=8 format=4 uid="uid://dkj85b2pmamcf"]
 
 [ext_resource type="Texture2D" uid="uid://bjvc7sdli2snk" path="res://objects/Asteroids/Ice_asteroid/Ice002_4K-JPG/Ice002_4K_Color.jpg" id="1_ponie"]
 [ext_resource type="Texture2D" uid="uid://ca0xioxw6akr4" path="res://objects/Asteroids/Ice_asteroid/Ice002_4K-JPG/Ice002_4K_NormalGL.jpg" id="2_meldv"]
 [ext_resource type="Texture2D" uid="uid://ccmurrwn0in1w" path="res://objects/Asteroids/Ice_asteroid/Ice002_4K-JPG/Ice002_4K_Roughness.jpg" id="3_xlu34"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_q2cha"]
+albedo_color = Color(0.506096, 0.635554, 0.611612, 1)
+billboard_mode = 1
+fixed_size = true
+
+[sub_resource type="QuadMesh" id="QuadMesh_u8u2y"]
+material = SubResource("StandardMaterial3D_q2cha")
+size = Vector2(0.005, 0.005)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_k0ljf"]
 albedo_texture = ExtResource("1_ponie")
@@ -10,6 +19,10 @@ roughness_texture = ExtResource("3_xlu34")
 normal_enabled = true
 normal_scale = 0.3
 normal_texture = ExtResource("2_meldv")
+subsurf_scatter_enabled = true
+subsurf_scatter_strength = 0.19
+subsurf_scatter_skin_mode = true
+uv1_scale = Vector3(4.555, 4.555, 4.555)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_6vhj4"]
 _surfaces = [{
@@ -27,5 +40,12 @@ _surfaces = [{
 }]
 blend_shape_mode = 0
 
-[node name="Ice_asteroid" type="MeshInstance3D"]
+[node name="Ice_asteroid" type="Node3D"]
+
+[node name="Asteroid_sprite" type="MeshInstance3D" parent="."]
+mesh = SubResource("QuadMesh_u8u2y")
+skeleton = NodePath("../Ice_asteroid")
+
+[node name="Ice_asteroid" type="MeshInstance3D" parent="."]
+visibility_range_end = 1572.2
 mesh = SubResource("ArrayMesh_6vhj4")
