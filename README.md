@@ -28,7 +28,7 @@ You can write to Vladimir Levadny in any common language, but it is better to us
 
 - VK https://vk.com/vladimirlevadnij
 - Telegram https://t.me/Vladimir_Levadnij
-- Email universo.pro@yandex.ru
+- Email universo.pro@yandex.com
   
 Our website (requires updating information, a lot of outdated information) https://universo.pro
 
