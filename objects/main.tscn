@@ -265,6 +265,7 @@ func _process(delta: float) -> void:
 script/source = "extends Node2D
 
 @export var drawing_font : Font
+#@onready var root = get_parent().get_parent().get_parent()
 
 var ore = 0
 var ore_target = 0

@@ -6,7 +6,6 @@ script/source = "extends Node
 @onready var loading_thread = Thread.new()
 var loading_finished = true
 
-
 func load_hangar_thread():
 	var hangar = load(\"res://objects/Hangar_interrior/hangarout_1.tscn\").instantiate()
 	hangar.name = \"Hangar\"
