@@ -1,6 +1,7 @@
-[gd_scene load_steps=12 format=3 uid="uid://chr7amhjts4ks"]
+[gd_scene load_steps=13 format=3 uid="uid://chr7amhjts4ks"]
 
 [ext_resource type="PackedScene" uid="uid://bmxe6vphltuan" path="res://objects/Vostok.glb" id="1_du4gx"]
+[ext_resource type="PackedScene" uid="uid://b7etsuv0a3lmd" path="res://objects/Station.tscn" id="2_ccn2u"]
 
 [sub_resource type="GDScript" id="GDScript_fxpjj"]
 script/source = "extends Node3D
@@ -13,9 +14,10 @@ func _ready() -> void:
 	for i in range(60):
 		var planet = planet_file.instantiate()
 		planet.position = Vector3(randf()-0.5, randf()-0.5, randf()-0.5) * 10000
-		for j in range(50):
+		for j in range(10):
 			var ice_asteroid = ice_asteroid_file.instantiate()
 			ice_asteroid.position = Vector3(randf()-0.5, randf()-0.5, randf()-0.5).normalized() * 120
+			#ice_asteroid.position += planet.position
 			planet.add_child(ice_asteroid)
 		$Space.add_child(planet)
 	pass # Replace with function body.
@@ -305,6 +307,9 @@ func search_process():
 		var obj = cam.objects[i]
 		if not cam.is_position_behind(obj):
 			var pos = cam.unproject_position(obj)
+			#var pos = proj * obj
+			#pos = Vector2(pos.x, pos.y)
+			#print(pos)
 			if pos.distance_to(get_viewport().get_mouse_position()) < sdist:
 				nearest = i
 				sdist = pos.distance_to(get_viewport().get_mouse_position())
@@ -314,6 +319,7 @@ func search_process():
 			sel_timer = 0
 	else:
 		select_target = null
+	thread_running = false
 
 func _draw() -> void:
 	if select_target != null and sel_timer < 1:
@@ -330,6 +336,11 @@ func _input(event: InputEvent) -> void:
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	queue_redraw()
+	#if my_thread == null:
+	#	my_thread = Thread.new()
+	#if thread_running == false:
+	#	my_thread.wait_to_finish()
+	#	my_thread.start(search_process, 0)
 	search_process()
 	var d1 = delta / 2
 	if select_target != null and select_target != cam.sel_idx:
@@ -361,8 +372,12 @@ func follow(from, to, distance):
 	return tr
 
 func set_target(target):
+	var target_size = 100
+	var obj = cam.space.get_child(cam.sel_idx)
+	if obj is VisualInstance3D:
+		target_size = obj.get_aabb().get_longest_axis_size()/2
 	$\".\".origin = transform
-	$\".\".target = follow(position, target, 120)
+	$\".\".target = follow(position, target, target_size * 1.2)
 	cam.target_transform = follow(cam.position, $\".\".target*$Track.position, 3)
 	progress = 0
 
@@ -432,10 +447,14 @@ transform = Transform3D(-4.15258e-09, 0, 0.095, 0, 0.095, 0, -0.095, 0, -4.15258
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.489687, -0.664556, 0.564422, 0, 0.647349, 0.762194, -0.871898, -0.373236, 0.316998, 3.27062, 1.15951, 0.38582)
+shadow_enabled = true
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_a1ax2")
 
 [node name="Space" type="Node3D" parent="."]
+
+[node name="Station" parent="Space" instance=ExtResource("2_ccn2u")]
+transform = Transform3D(3.658, 0, 0, 0, 1.824, 0, 0, 0, 7.305, -4.62255, 1.72616, -27.3919)
 
 [connection signal="draw" from="Camera3D/Interface" to="Camera3D" method="_on_interface_draw"]
