@@ -1,7 +1,5 @@
 [gd_scene load_steps=3 format=3 uid="uid://chr7amhjts4ks"]
 
-[ext_resource type="PackedScene" uid="uid://cab6foemqg1pd" path="res://objects/main.tscn" id="1_gmjbk"]
-
 [sub_resource type="GDScript" id="GDScript_1i1yl"]
 script/source = "extends Node
 
@@ -12,14 +10,14 @@ var loading_finished = true
 func load_hangar_thread():
 	var hangar = load(\"res://objects/Hangar_interrior/hangarout_1.tscn\").instantiate()
 	hangar.name = \"Hangar\"
-	self.get_child(0).queue_free()
+	self.get_child(1).queue_free()
 	self.add_child.call_deferred(hangar)
 	loading_finished = true
 
 func load_world_thread():
 	var world = load(\"res://objects/main.tscn\").instantiate()
 	world.name = \"Main\"
-	self.get_child(0).queue_free()
+	self.get_child(1).queue_free()
 	self.add_child.call_deferred(world)
 	loading_finished = true
 
@@ -45,6 +43,7 @@ func load_world():
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	load_world()
 	pass # Replace with function body.
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -52,7 +51,37 @@ func _process(delta: float) -> void:
 	pass
 "
 
+[sub_resource type="GDScript" id="GDScript_rpm83"]
+script/source = "extends Node2D
+
+@export var loading_color : Color
+@onready var root = get_parent()
+var anim = 0
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	pass # Replace with function body.
+
+func _draw() -> void:
+	draw_arc(get_viewport().size/2, 30, anim, anim+sin(anim) * PI / 6 + PI/4, 20, loading_color, 7, true)
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	#queue_redraw()
+	#anim += delta * 4
+	if not root.loading_finished:
+		queue_redraw()
+		anim += delta * 10
+		visible = true
+	else:
+		visible = false
+"
+
 [node name="Root" type="Node"]
 script = SubResource("GDScript_1i1yl")
 
-[node name="Main" parent="." instance=ExtResource("1_gmjbk")]
+[node name="Load_indicator" type="Node2D" parent="."]
+script = SubResource("GDScript_rpm83")
+loading_color = Color(0.206229, 0.480148, 0.559666, 1)
+
+[node name="Placeholder" type="Sprite2D" parent="."]
