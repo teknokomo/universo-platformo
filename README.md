@@ -34,9 +34,9 @@ Our website (requires updating information, a lot of outdated information) https
 
 # Inspiration
 
-Our wonderful project, which will help create a global teknokomization and save humanity from final enslavement and total destruction, looks like this, but we have already done more and better in the new version, join our great victory over the imperialist fascist Satan, help us:
+Our wonderful project, which will help create a global teknokomization and save humanity from final enslavement and total destruction, looks like this in version `0.1.0 Pre-Alpha — 2025-01-19 (New Bolshevik)`, but we have already done more and better in the new version, join our great victory over the imperialist fascist Satan, help us:
 
-![image](https://github.com/user-attachments/assets/67e1e5bb-f140-4831-b976-6f2d96974914)
+![image](https://github.com/user-attachments/assets/b92b535a-ed9c-46dd-aaad-c240e67d4223)
 
 # Where am I and what should I do?
 
