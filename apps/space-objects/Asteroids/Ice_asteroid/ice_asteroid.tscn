@@ -1,8 +1,8 @@
 [gd_scene load_steps=8 format=4 uid="uid://dkj85b2pmamcf"]
 
-[ext_resource type="Texture2D" uid="uid://bjvc7sdli2snk" path="res://objects/Asteroids/Ice_asteroid/Ice002_4K-JPG/Ice002_4K_Color.jpg" id="1_ponie"]
-[ext_resource type="Texture2D" uid="uid://ca0xioxw6akr4" path="res://objects/Asteroids/Ice_asteroid/Ice002_4K-JPG/Ice002_4K_NormalGL.jpg" id="2_meldv"]
-[ext_resource type="Texture2D" uid="uid://ccmurrwn0in1w" path="res://objects/Asteroids/Ice_asteroid/Ice002_4K-JPG/Ice002_4K_Roughness.jpg" id="3_xlu34"]
+[ext_resource type="Texture2D" uid="uid://bjvc7sdli2snk" path="res://apps/space-objects/Asteroids/Ice_asteroid/Ice002_4K-JPG/Ice002_4K_Color.jpg" id="1_ponie"]
+[ext_resource type="Texture2D" uid="uid://ca0xioxw6akr4" path="res://apps/space-objects/Asteroids/Ice_asteroid/Ice002_4K-JPG/Ice002_4K_NormalGL.jpg" id="2_meldv"]
+[ext_resource type="Texture2D" uid="uid://ccmurrwn0in1w" path="res://apps/space-objects/Asteroids/Ice_asteroid/Ice002_4K-JPG/Ice002_4K_Roughness.jpg" id="3_xlu34"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_q2cha"]
 albedo_color = Color(0.506096, 0.635554, 0.611612, 1)

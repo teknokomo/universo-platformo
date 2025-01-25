@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://bq0x1kejgm02h"]
 
-[ext_resource type="Texture2D" uid="uid://qrdmgvo8l7qh" path="res://textures/4k_ceres_fictional.jpg" id="1_gtxgy"]
+[ext_resource type="Texture2D" uid="uid://qrdmgvo8l7qh" path="res://apps/space-objects/textures/4k_ceres_fictional.jpg" id="1_gtxgy"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_yygu5"]
 

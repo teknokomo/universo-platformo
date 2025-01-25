@@ -7,14 +7,14 @@ script/source = "extends Node
 var loading_finished = true
 
 func load_hangar_thread():
-	var hangar = load(\"res://objects/Hangar_interrior/hangarout_1.tscn\").instantiate()
+	var hangar = load(\"res://apps/space-objects/Hangar_interrior/hangarout_1.tscn\").instantiate()
 	hangar.name = \"Hangar\"
 	self.get_child(1).queue_free()
 	self.add_child.call_deferred(hangar)
 	loading_finished = true
 
 func load_world_thread():
-	var world = load(\"res://objects/main.tscn\").instantiate()
+	var world = load(\"res://apps/space-objects/main.tscn\").instantiate()
 	world.name = \"Main\"
 	self.get_child(1).queue_free()
 	self.add_child.call_deferred(world)
