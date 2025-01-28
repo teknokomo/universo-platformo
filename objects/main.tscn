@@ -247,8 +247,9 @@ func _process(delta: float) -> void:
 			if gen_timer - delta <= 0:
 				for marker in mineral_array:
 					if not marker.queue_remove:
+						mining_request()
 						marker.signal_delete()
-						cam.find_child(\"Ore_display\").ore_target += randf_range(0.9, 1.1)
+						#cam.find_child(\"Ore_display\").ore_target += randf_range(0.9, 1.1)
 						break
 			gen_timer -= delta
 		else:
@@ -259,6 +260,15 @@ func _process(delta: float) -> void:
 		elif Input.is_key_pressed(KEY_R):
 			gen_timer = 0.1
 	pass
+
+func mining_request():
+	var url = \"http://127.0.0.1:8080/mining\"
+	if $MineRequest.get_http_client_status() == HTTPClient.STATUS_DISCONNECTED:
+		var error = $MineRequest.request(url)
+
+func _on_http_request_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
+	cam.find_child(\"Ore_display\").ore_update()
+	pass # Replace with function body.
 "
 
 [sub_resource type="GDScript" id="GDScript_s08ui"]
@@ -266,6 +276,7 @@ script/source = "extends Node2D
 
 @export var drawing_font : Font
 #@onready var root = get_parent().get_parent().get_parent()
+@onready var ore_request = $OreRequest
 
 var ore = 0
 var ore_target = 0
@@ -279,9 +290,36 @@ A/D - следующая/предыдущая планета в порядков
 E (возле станции) - зайти/выйти из станции
 Удерживать R - собрать ресурсы\"\"\"
 
+func ore_update():
+	var url = \"http://127.0.0.1:8080/ore_data\"
+	var error = ore_request.request(url)
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	ore_request.request_completed.connect(_on_request_completed)
+	ore_update()
 	pass # Replace with function body.
+
+func _on_request_completed(result, response_code, headers, body):
+	if response_code == 200:
+		print(\"Ответ: \", body.get_string_from_utf8())
+		var data = parse_json(body.get_string_from_utf8())
+		ore_target = float(data[\"starship_ore\"])
+	else:
+		print(\"Ошибка: \", response_code)
+
+func parse_json(json_string: String):
+	var json = JSON.new()
+	var parse_result = json.parse(json_string)
+
+	if parse_result == OK:
+		var data = json.get_data()
+		print(\"Парсинг успешен: \", data)
+		return data
+		# Теперь вы можете работать с данными, например:
+		# var value = data[\"key\"]  # Замените \"key\" на нужный ключ
+	else:
+		print(\"Ошибка парсинга JSON: \", json.get_error_message())
 
 func _draw() -> void:
 	var text = \"Запасы руды: \" + str(ore - fmod(ore, 0.001))
@@ -441,11 +479,15 @@ colcurve = SubResource("Curve_xfs4b")
 script = SubResource("GDScript_7s2eg")
 ore_color = Color(1, 0.825743, 0.187742, 1)
 
+[node name="MineRequest" type="HTTPRequest" parent="Camera3D/Scanner_mode"]
+
 [node name="Interface" type="Node2D" parent="Camera3D"]
 
 [node name="Ore_display" type="Node2D" parent="Camera3D"]
 script = SubResource("GDScript_s08ui")
 drawing_font = SubResource("SystemFont_uebsj")
+
+[node name="OreRequest" type="HTTPRequest" parent="Camera3D/Ore_display"]
 
 [node name="Object_select" type="Node2D" parent="Camera3D"]
 script = SubResource("GDScript_ceowy")
@@ -471,4 +513,5 @@ environment = SubResource("Environment_a1ax2")
 [node name="Station" parent="Space" instance=ExtResource("2_afrrc")]
 transform = Transform3D(3.658, 0, 0, 0, 1.824, 0, 0, 0, 7.305, -4.62255, 1.72616, -27.3919)
 
+[connection signal="request_completed" from="Camera3D/Scanner_mode/MineRequest" to="Camera3D/Scanner_mode" method="_on_http_request_request_completed"]
 [connection signal="draw" from="Camera3D/Interface" to="Camera3D" method="_on_interface_draw"]
