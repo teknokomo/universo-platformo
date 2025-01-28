@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-const preview_scene = preload("res://addons/anthonyec.camera_preview/preview.tscn")
+const preview_scene = preload("res://apps/godot-plugins/anthonyec.camera_preview/preview.tscn")
 
 var preview: CameraPreview
 var current_main_screen_name: String

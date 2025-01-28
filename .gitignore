@@ -1,6 +1,7 @@
 # Main
 .import/
 .godot/
+*.import
 export_presets.cfg
 .directory
 *.so

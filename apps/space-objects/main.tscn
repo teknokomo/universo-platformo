@@ -1,13 +1,13 @@
 [gd_scene load_steps=13 format=3 uid="uid://cab6foemqg1pd"]
 
-[ext_resource type="PackedScene" uid="uid://bmxe6vphltuan" path="res://objects/Vostok.glb" id="1_w7c0d"]
-[ext_resource type="PackedScene" uid="uid://b7etsuv0a3lmd" path="res://objects/Station.tscn" id="2_afrrc"]
+[ext_resource type="PackedScene" uid="uid://bmxe6vphltuan" path="res://apps/space-objects/Vostok.glb" id="1_w7c0d"]
+[ext_resource type="PackedScene" uid="uid://b7etsuv0a3lmd" path="res://apps/space-objects/Station.tscn" id="2_afrrc"]
 
 [sub_resource type="GDScript" id="GDScript_fxpjj"]
 script/source = "extends Node3D
 
-var planet_file = preload(\"res://objects/planet.tscn\")
-var ice_asteroid_file = preload(\"res://objects/Asteroids/Ice_asteroid/ice_asteroid.tscn\")
+var planet_file = preload(\"res://apps/space-objects/planet.tscn\")
+var ice_asteroid_file = preload(\"res://apps/space-objects/Asteroids/Ice_asteroid/ice_asteroid.tscn\")
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
