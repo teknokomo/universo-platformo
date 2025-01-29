@@ -1,6 +1,6 @@
 [gd_scene load_steps=13 format=3 uid="uid://cab6foemqg1pd"]
 
-[ext_resource type="PackedScene" uid="uid://bmxe6vphltuan" path="res://apps/space-objects/Vostok.glb" id="1_w7c0d"]
+[ext_resource type="PackedScene" uid="uid://xsel3p7nd78f" path="res://apps/space-objects/Vostok.glb" id="1_w7c0d"]
 [ext_resource type="PackedScene" uid="uid://b7etsuv0a3lmd" path="res://apps/space-objects/Station.tscn" id="2_afrrc"]
 
 [sub_resource type="GDScript" id="GDScript_fxpjj"]
