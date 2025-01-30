@@ -101,7 +101,7 @@ func _input(event: InputEvent) -> void:
 			if event.keycode == KEY_E:
 				if space.get_child(sel_idx).name == \"Station\":
 					if space.get_child(sel_idx).global_position.distance_to(global_position) < 50:
-						get_parent().get_parent().load_hangar()
+						get_parent().get_parent().get_parent().load_hangar()
 	if event is InputEventMouseMotion:
 		if event.button_mask & MOUSE_BUTTON_MASK_LEFT:
 			var vec = target_transform.origin - spaceship.target.origin
@@ -164,6 +164,7 @@ script/source = "extends Node2D
 @onready var cam = get_parent()
 #@export var appearance
 @export var ore_color : Color
+@onready var username = get_parent().get_parent().get_parent().get_parent().username
 
 var mineral_array : Array
 
@@ -262,7 +263,7 @@ func _process(delta: float) -> void:
 	pass
 
 func mining_request():
-	var url = \"http://127.0.0.1:8080/mining\"
+	var url = \"http://127.0.0.1:8080/mining?username={0}\".format([username])
 	if $MineRequest.get_http_client_status() == HTTPClient.STATUS_DISCONNECTED:
 		var error = $MineRequest.request(url)
 
@@ -277,6 +278,8 @@ script/source = "extends Node2D
 @export var drawing_font : Font
 #@onready var root = get_parent().get_parent().get_parent()
 @onready var ore_request = $OreRequest
+@onready var username = get_parent().get_parent().get_parent().get_parent().username
+
 
 var ore = 0
 var ore_target = 0
@@ -291,7 +294,7 @@ E (возле станции) - зайти/выйти из станции
 Удерживать R - собрать ресурсы\"\"\"
 
 func ore_update():
-	var url = \"http://127.0.0.1:8080/ore_data\"
+	var url = \"http://127.0.0.1:8080/ore_data?username={0}\".format([username])
 	var error = ore_request.request(url)
 
 # Called when the node enters the scene tree for the first time.

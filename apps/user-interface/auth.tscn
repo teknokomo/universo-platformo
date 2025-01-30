@@ -1,0 +1,70 @@
+[gd_scene load_steps=2 format=3 uid="uid://djsm4hlncyvhk"]
+
+[sub_resource type="GDScript" id="GDScript_hgty2"]
+script/source = "extends Control
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	pass
+
+
+func _on_join_the_game_pressed() -> void:
+	var error = $LoginRequest.request(\"http://127.0.0.1:8080/login\", PackedStringArray(),HTTPClient.METHOD_POST, $LineEdit.text)
+	pass # Replace with function body.
+
+
+func _on_login_request_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
+	if result == HTTPRequest.RESULT_SUCCESS:
+		var response = body.get_string_from_utf8()
+		if response == \"logged\":
+			var root = get_parent().get_parent()
+			root.username = $LineEdit.text
+			root.find_child(\"Heartbeat\").start()
+		else:
+			print(response)
+	pass # Replace with function body.
+"
+
+[node name="Auth" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_hgty2")
+
+[node name="LineEdit" type="LineEdit" parent="."]
+layout_mode = 0
+offset_left = 87.0
+offset_top = 73.0
+offset_right = 349.0
+offset_bottom = 113.0
+text = "user"
+
+[node name="Label" type="Label" parent="LineEdit"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = -34.0
+offset_right = 46.0
+offset_bottom = -11.0
+text = "Имя пользователя"
+
+[node name="JoinTheGame" type="Button" parent="."]
+layout_mode = 0
+offset_left = 271.0
+offset_top = 136.0
+offset_right = 330.0
+offset_bottom = 167.0
+text = "Вход"
+
+[node name="LoginRequest" type="HTTPRequest" parent="."]
+
+[connection signal="pressed" from="JoinTheGame" to="." method="_on_join_the_game_pressed"]
+[connection signal="request_completed" from="LoginRequest" to="." method="_on_login_request_request_completed"]
