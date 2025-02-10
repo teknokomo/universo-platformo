@@ -54,7 +54,7 @@ offset_left = 6.0
 offset_top = -34.0
 offset_right = 46.0
 offset_bottom = -11.0
-text = "Имя пользователя"
+text = "Username"
 
 [node name="JoinTheGame" type="Button" parent="."]
 layout_mode = 0
@@ -62,7 +62,7 @@ offset_left = 271.0
 offset_top = 136.0
 offset_right = 330.0
 offset_bottom = 167.0
-text = "Вход"
+text = "Login"
 
 [node name="LoginRequest" type="HTTPRequest" parent="."]
 

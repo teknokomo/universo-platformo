@@ -284,14 +284,14 @@ script/source = "extends Node2D
 var ore = 0
 var ore_target = 0
 
-var description = \"\"\"Навести курсор - выбрать планету
-Перетаскивание - обзор
-Колесо мыши - приблизить/отдалить
-Клик по выбранной планете/Space - прыжок к планете
-A/D - следующая/предыдущая планета в порядковом номере
-Удерживать E - сканировать ресурсы
-E (возле станции) - зайти/выйти из станции
-Удерживать R - собрать ресурсы\"\"\"
+var description = \"\"\"Hover the cursor - select a planet
+Dragging - look around
+Mouse wheel - zoom in/out
+Click on the selected planet/Space - jump to the planet
+A/D - next/previous planet in sequential order
+Hold E - scan for resources
+E (near the station) - enter/exit the station
+Hold R - collect resources\"\"\"
 
 func ore_update():
 	var url = \"http://127.0.0.1:8080/ore_data?username={0}\".format([username])
