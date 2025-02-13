@@ -1,0 +1,13 @@
+[GLOBAL]
+pants_version = "2.24.0"
+backend_packages = [
+  "pants.backend.python",
+  "pants.backend.javascript"
+]
+source_root_patterns = ["apps/"]
+
+[python]
+interpreter_constraints = [">=3.8"]
+
+[javascript]
+node_version = "18"
