@@ -1,0 +1,64 @@
+[gd_scene load_steps=2 format=3 uid="uid://ki7251jwdbtv"]
+
+[ext_resource type="Script" path="res://Main.gd" id="1"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Магазин приложений Universo Platformo"
+horizontal_alignment = 1
+
+[node name="StrapiHBox" type="HBoxContainer" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+
+[node name="StrapiLabel" type="Label" parent="CenterContainer/VBoxContainer/StrapiHBox"]
+layout_mode = 2
+text = "Strapi основной"
+horizontal_alignment = 1
+
+[node name="StrapiDownloadButton" type="Button" parent="CenterContainer/VBoxContainer/StrapiHBox"]
+layout_mode = 2
+text = "Загрузить"
+
+[node name="StrapiInstallButton" type="Button" parent="CenterContainer/VBoxContainer/StrapiHBox"]
+layout_mode = 2
+text = "Установить"
+
+[node name="DjangoHBox" type="HBoxContainer" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+
+[node name="DjangoLabel" type="Label" parent="CenterContainer/VBoxContainer/DjangoHBox"]
+layout_mode = 2
+text = "Django основной"
+horizontal_alignment = 1
+
+[node name="DjangoDownloadButton" type="Button" parent="CenterContainer/VBoxContainer/DjangoHBox"]
+layout_mode = 2
+text = "Загрузить"
+
+[node name="DjangoInstallButton" type="Button" parent="CenterContainer/VBoxContainer/DjangoHBox"]
+layout_mode = 2
+text = "Установить"
