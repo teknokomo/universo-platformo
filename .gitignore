@@ -1,4 +1,4 @@
-# Main
+# Main project directories and files
 .import/
 .godot/
 *.import
@@ -8,10 +8,47 @@ export_presets.cfg
 *.os
 *.dblite
 
-# Server settings
+# Server configuration files
 settings.cfg
 
 # Log files
 *.cfg
 *.txt
 *.log
+
+# Python virtual environment
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE files (e.g., VS Code)
+.vscode/
+*.code-workspace
+
+# Operating system-specific files
+.DS_Store
+Thumbs.db
+
+# Temporary project files
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Local environment configuration files
+.env
+.env.*
+.local
+
+# Other types of files that may appear during development
+*.swp  # Vim swap files
+*.swo  # Vim backup files
+
+# Pants build files
+.pants.d/
