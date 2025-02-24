@@ -325,7 +325,7 @@ func parse_json(json_string: String):
 		print(\"Ошибка парсинга JSON: \", json.get_error_message())
 
 func _draw() -> void:
-	var text = \"Запасы руды: \" + str(ore - fmod(ore, 0.001))
+	var text = \"Ore reserves: \" + str(ore - fmod(ore, 0.001))
 	draw_multiline_string(drawing_font, Vector2(get_viewport().size.x - 250, 40), text, HORIZONTAL_ALIGNMENT_RIGHT, -1, 22)
 	draw_multiline_string(drawing_font, Vector2(20, 40), description)
 
